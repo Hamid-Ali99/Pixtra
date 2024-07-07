@@ -16,9 +16,10 @@ import { Button } from "@/components/ui/button";
 import { SignupValidation } from "@/lib/validation";
 import { Link } from "react-router-dom";
 import Loader from "@/components/shared/Loader";
+import { createUserAccount } from "@/lib/appwrite/api";
 
 const SignUpForm = () => {
-  const isLoading = true;
+  const isLoading = false;
 
   const form = useForm<z.infer<typeof SignupValidation>>({
     resolver: zodResolver(SignupValidation),
@@ -31,7 +32,11 @@ const SignUpForm = () => {
   });
 
   // Handler
-  const handleSignup = async (user: z.infer<typeof SignupValidation>) => {};
+  const handleSignup = async (user: z.infer<typeof SignupValidation>) => {
+    const newUser = await createUserAccount(user);
+
+    console.log(newUser);
+  };
 
   return (
     <Form {...form}>
