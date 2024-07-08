@@ -17,8 +17,11 @@ import { SignupValidation } from "@/lib/validation";
 import { Link } from "react-router-dom";
 import Loader from "@/components/shared/Loader";
 import { createUserAccount } from "@/lib/appwrite/api";
+import { useToast } from "@/components/ui/use-toast";
 
 const SignUpForm = () => {
+  const { toast } = useToast();
+
   const isLoading = false;
 
   const form = useForm<z.infer<typeof SignupValidation>>({
@@ -34,6 +37,10 @@ const SignUpForm = () => {
   // Handler
   const handleSignup = async (user: z.infer<typeof SignupValidation>) => {
     const newUser = await createUserAccount(user);
+
+    if (!newUser) {
+      return toast({ title: "Sign up failed. Please try again." });
+    }
 
     console.log(newUser);
   };
