@@ -20,7 +20,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useUserContext } from "@/context/AuthContext";
 import FileUploader from "@/components/shared/FileUploader";
 import Loader from "@/components/shared/Loader";
-import { useCreatePost } from "@/lib/react-query/queries";
+import { useCreatePost, useUpdatePost } from "@/lib/react-query/queries";
 
 type PostFormProps = {
   post?: Models.Document;
@@ -48,6 +48,9 @@ const PostForm = ({ post, action }: PostFormProps) => {
   const { mutateAsync: createPost, isPending: isLoadingCreate } =
     useCreatePost();
 
+  const { mutateAsync: updatePost, isPending: isLoadingUpdate } =
+    useUpdatePost();
+
   // Form Handler
   const handleSubmit = async (value: z.infer<typeof PostValidation>) => {
     if (!user?.id) {
@@ -55,6 +58,23 @@ const PostForm = ({ post, action }: PostFormProps) => {
         title: "User ID is not defined. Please log in again.",
       });
       return;
+    }
+
+    // ACTION = UPDATE
+    if (post && action == "Update") {
+      const updatedPost = await updatePost({
+        ...value,
+        postId: post.$id,
+        imageId: post?.imageId,
+        imageUrl: post?.imageUrl,
+      });
+
+      if (!updatedPost) {
+        toast({
+          title: `${action} post failed. Please try again.`,
+        });
+      }
+      return navigate(`/posts/${post.$id}`);
     }
 
     // ACTION = CREATE
@@ -157,9 +177,9 @@ const PostForm = ({ post, action }: PostFormProps) => {
           <Button
             type="submit"
             className="shad-button_primary whitespace-nowrap"
-            disabled={isLoadingCreate}
+            disabled={isLoadingCreate || isLoadingUpdate}
           >
-            {isLoadingCreate && <Loader />}
+            {isLoadingCreate || (isLoadingUpdate && <Loader />)}
             {action} Post
           </Button>
         </div>
